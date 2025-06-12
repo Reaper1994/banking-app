@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Transfer;
+use App\Observers\TransferObserver;
 use App\Repositories\Interfaces\TransferRepositoryInterface;
 use App\Repositories\TransferRepository;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +25,6 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Transfer::observe(TransferObserver::class);
     }
 }
