@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Link } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Currency {
     id: number;
@@ -24,8 +25,25 @@ interface SavingsAccount {
     currency: Currency;
 }
 
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface PaginatedData {
+    data: SavingsAccount[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    links: PaginationLink[];
+}
+
 interface Props {
-    accounts: SavingsAccount[];
+    accounts: PaginatedData;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -88,7 +106,7 @@ export default function Index({ accounts }: Props) {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {accounts.map((account) => (
+                                        {accounts.data.map((account) => (
                                             <tr key={account.id}>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                     {account.account_number}
@@ -116,6 +134,62 @@ export default function Index({ accounts }: Props) {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+
+                            {/* Pagination */}
+                            <div className="mt-6 flex items-center justify-between">
+                                <div className="text-sm text-gray-700">
+                                    Showing <span className="font-medium">{accounts.from}</span> to{' '}
+                                    <span className="font-medium">{accounts.to}</span> of{' '}
+                                    <span className="font-medium">{accounts.total}</span> results
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    {accounts.links.map((link, i) => {
+                                        if (i === 0) {
+                                            return (
+                                                <Link
+                                                    key={i}
+                                                    href={link.url || '#'}
+                                                    className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                                                        !link.url
+                                                            ? 'text-gray-400 cursor-not-allowed'
+                                                            : 'text-gray-700 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <ChevronLeft className="h-4 w-4" />
+                                                </Link>
+                                            );
+                                        }
+                                        if (i === accounts.links.length - 1) {
+                                            return (
+                                                <Link
+                                                    key={i}
+                                                    href={link.url || '#'}
+                                                    className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                                                        !link.url
+                                                            ? 'text-gray-400 cursor-not-allowed'
+                                                            : 'text-gray-700 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    <ChevronRight className="h-4 w-4" />
+                                                </Link>
+                                            );
+                                        }
+                                        return (
+                                            <Link
+                                                key={i}
+                                                href={link.url || '#'}
+                                                className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                                                    link.active
+                                                        ? 'bg-indigo-600 text-white'
+                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

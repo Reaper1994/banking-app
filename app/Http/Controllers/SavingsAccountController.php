@@ -23,7 +23,7 @@ class SavingsAccountController extends Controller
     {
         $accounts = SavingsAccount::with(['user', 'currency'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return Inertia::render('SavingsAccounts/Index', [
             'accounts' => $accounts,
