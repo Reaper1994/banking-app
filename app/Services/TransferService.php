@@ -33,25 +33,22 @@ final class TransferService
             throw new InvalidArgumentException('Insufficient funds');
         }
 
+        //allowed multi currency transfer
         // if ($senderAccount->currency !== $currency) {
         //     throw new InvalidArgumentException('Sender account currency does not match transfer currency');
         // }
 
         return DB::transaction(function () use ($senderAccount, $recipientAccount, $amount, $description, $currency) {
-            // Convert amount if currencies are different
             $convertedAmount = $this->currencyService->convert(
                 $amount,
                 $senderAccount->currency->code,
                 $recipientAccount->currency->code
             );
 
-            // Deduct from sender
             $senderAccount->decrement('balance', $amount);
 
-            // Add to recipient
             $recipientAccount->increment('balance', $convertedAmount);
 
-            // Create transfer record
             return $this->transferRepository->create([
                 'sender_account_id' => $senderAccount->id,
                 'recipient_account_id' => $recipientAccount->id,
