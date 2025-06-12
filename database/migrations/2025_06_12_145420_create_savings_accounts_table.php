@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('account_number')->unique();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->date('date_of_birth');
-            $table->text('address');
+            // $table->string('first_name');
+            // $table->string('last_name');
+            // $table->date('date_of_birth');
+            // $table->text('address');
             $table->decimal('balance', 12, 2)->default(10000.00);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

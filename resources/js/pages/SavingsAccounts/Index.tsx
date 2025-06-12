@@ -15,12 +15,13 @@ interface Currency {
 interface SavingsAccount {
     id: number;
     account_number: string;
-    first_name: string;
-    last_name: string;
     balance: string | number;
     is_active: boolean;
     user: {
         email: string;
+        address: string;
+        first_name: string;
+        last_name: string;
     };
     currency: Currency;
 }
@@ -95,6 +96,9 @@ export default function Index({ accounts }: Props) {
                                                 Email
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Address
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Balance
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -112,10 +116,13 @@ export default function Index({ accounts }: Props) {
                                                     {account.account_number}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {account.first_name} {account.last_name}
+                                                    {account.user.first_name} {account.user.last_name}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {account.user.email}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {account.user.address}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {formatBalance(account.balance, account.currency)}

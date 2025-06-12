@@ -13,10 +13,6 @@ class SavingsAccount extends Model
     protected $fillable = [
         'account_number',
         'user_id',
-        'first_name',
-        'last_name',
-        'date_of_birth',
-        'address',
         'balance',
         'currency_id',
         'is_active',

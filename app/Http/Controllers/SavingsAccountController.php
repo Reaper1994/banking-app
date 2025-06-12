@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSavingsAccountsRequest;
 use App\Models\SavingsAccount;
 use App\Models\User;
 use App\Models\Currency;
@@ -21,7 +22,7 @@ class SavingsAccountController extends Controller
 
     public function index()
     {
-        $accounts = SavingsAccount::with(['user', 'currency'])
+        $accounts = SavingsAccount::with(['user:id,email,first_name,last_name,address', 'currency'])
             ->latest()
             ->paginate(10);
 
@@ -46,19 +47,9 @@ class SavingsAccountController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreSavingsAccountsRequest $request)
     {
         Gate::authorize('create', SavingsAccount::class);
-
-        $request->validate([
-            'accounts' => 'required|array|min:1',
-            'accounts.*.user_id' => 'required|exists:users,id',
-            'accounts.*.first_name' => 'required|string|max:255',
-            'accounts.*.last_name' => 'required|string|max:255',
-            'accounts.*.date_of_birth' => 'required|date',
-            'accounts.*.address' => 'required|string|max:255',
-            'accounts.*.currency_id' => 'required|exists:currencies,id',
-        ]);
 
         DB::beginTransaction();
 
@@ -67,18 +58,20 @@ class SavingsAccountController extends Controller
                 // Get the selected user
                 $user = User::findOrFail($accountData['user_id']);
 
-                // Get currency exchange rate
                 $currency = Currency::findOrFail($accountData['currency_id']);
-                $initialBalance = 10000 * $currency->exchange_rate;
+                $initialBalance = config('savings.initial_balance') * $currency->exchange_rate;
 
-                // Create savings account
-                SavingsAccount::create([
-                    'account_number' => 'SAV' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT),
-                    'user_id' => $user->id,
+                $user = User::findOrFail($user->id);
+                
+                $user->update([
                     'first_name' => $accountData['first_name'],
                     'last_name' => $accountData['last_name'],
                     'date_of_birth' => $accountData['date_of_birth'],
                     'address' => $accountData['address'],
+                ]);
+
+                SavingsAccount::create([
+                    'user_id' => $user->id,
                     'balance' => $initialBalance,
                     'currency_id' => $accountData['currency_id'],
                     'is_active' => true,
