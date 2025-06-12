@@ -23,6 +23,7 @@ final class TransferRequest extends FormRequest
             'recipient_account_number' => ['required', 'exists:savings_accounts,account_number'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'description' => ['nullable', 'string', 'max:255'],
+            'currency' => ['required', 'string', 'size:3', 'in:USD,EUR,GBP'],
         ];
     }
 
@@ -37,6 +38,10 @@ final class TransferRequest extends FormRequest
             'amount.numeric' => 'The amount must be a number.',
             'amount.min' => 'The amount must be at least 0.01.',
             'description.max' => 'The description cannot exceed 255 characters.',
+            'currency.required' => 'The currency is required.',
+            'currency.string' => 'The currency must be a string.',
+            'currency.size' => 'The currency must be a 3-letter code.',
+            'currency.in' => 'The currency must be USD, EUR, or GBP.',
         ];
     }
 

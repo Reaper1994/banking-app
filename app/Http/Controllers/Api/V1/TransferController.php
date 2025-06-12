@@ -29,7 +29,8 @@ final class TransferController extends Controller
                 $senderAccount,
                 $recipientAccount,
                 (float) $request->input('amount'),
-                $request->input('description')
+                $request->input('description'),
+                $request->input('currency')
             );
 
             return response()->json([

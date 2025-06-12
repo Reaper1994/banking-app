@@ -6,15 +6,15 @@ namespace App\Services;
 
 use App\Models\SavingsAccount;
 use App\Models\Transfer;
-use App\Repositories\Interfaces\TransferRepositoryInterface;
+use App\Repositories\TransferRepository;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 final class TransferService
 {
     public function __construct(
-        private readonly TransferRepositoryInterface $transferRepository
+        private readonly TransferRepository $transferRepository,
+        private readonly CurrencyConversionService $currencyService
     ) {
     }
 
@@ -22,47 +22,52 @@ final class TransferService
         SavingsAccount $senderAccount,
         SavingsAccount $recipientAccount,
         float $amount,
-        ?string $description = null
+        ?string $description,
+        string $currency
     ): Transfer {
         if ($senderAccount->id === $recipientAccount->id) {
-            throw new InvalidArgumentException('Cant transfer to the same account');
+            throw new InvalidArgumentException('Cannot transfer to the same account');
         }
 
         if ($senderAccount->balance < $amount) {
             throw new InvalidArgumentException('Insufficient funds');
         }
 
-        // Commented as we need multi currncy support
-        // if ($senderAccount->currency_id !== $recipientAccount->currency_id) {
-        //     throw new InvalidArgumentException('Currency mismatch between accounts');
+        // if ($senderAccount->currency !== $currency) {
+        //     throw new InvalidArgumentException('Sender account currency does not match transfer currency');
         // }
 
-        return DB::transaction(function () use ($senderAccount, $recipientAccount, $amount, $description) {
-            $transfer = $this->transferRepository->create([
-                'reference_number' => $this->generateReferenceNumber(),
+        return DB::transaction(function () use ($senderAccount, $recipientAccount, $amount, $description, $currency) {
+            // Convert amount if currencies are different
+            $convertedAmount = $this->currencyService->convert(
+                $amount,
+                $senderAccount->currency->code,
+                $recipientAccount->currency->code
+            );
+
+            // Deduct from sender
+            $senderAccount->decrement('balance', $amount);
+
+            // Add to recipient
+            $recipientAccount->increment('balance', $convertedAmount);
+
+            // Create transfer record
+            return $this->transferRepository->create([
                 'sender_account_id' => $senderAccount->id,
                 'recipient_account_id' => $recipientAccount->id,
                 'amount' => $amount,
-                'status' => 'pending',
+                'converted_amount' => $convertedAmount,
+                'currency' => $currency,
+                'recipient_currency' => $recipientAccount->currency->code,
                 'description' => $description,
+                'status' => 'completed',
+                'reference_number' => $this->generateReferenceNumber(),
             ]);
-
-
-            $senderAccount->decrement('balance', $amount);
-            $recipientAccount->increment('balance', $amount);
-
-            $this->transferRepository->updateStatus($transfer, 'completed');
-
-            return $transfer;
         });
     }
 
     private function generateReferenceNumber(): string
     {
-        do {
-            $reference = 'TRF-' . strtoupper(Str::random(10));
-        } while ($this->transferRepository->findByReferenceNumber($reference));
-
-        return $reference;
+        return 'TRF-' . strtoupper(uniqid());
     }
 } 

@@ -15,16 +15,20 @@ final class Transfer extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'reference_number',
         'sender_account_id',
         'recipient_account_id',
         'amount',
-        'status',
+        'converted_amount',
+        'currency',
+        'recipient_currency',
         'description',
+        'status',
+        'reference_number',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'converted_amount' => 'decimal:2',
     ];
 
     public function senderAccount(): BelongsTo
