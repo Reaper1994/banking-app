@@ -20,6 +20,11 @@ class SavingsAccountController extends Controller
         Gate::authorize('viewAny', SavingsAccount::class);
     }
 
+   /**
+     * Display a paginated list of savings accounts.
+     *
+     * @return \Inertia\Response
+     */
     public function index()
     {
         $accounts = SavingsAccount::with(['user:id,email,first_name,last_name,address', 'currency'])
@@ -31,6 +36,13 @@ class SavingsAccountController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating new savings accounts.
+     *
+     * @return \Inertia\Response
+     *
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function create()
     {
         Gate::authorize('create', SavingsAccount::class);
@@ -47,6 +59,15 @@ class SavingsAccountController extends Controller
         ]);
     }
 
+    /**
+     * Store newly created savings accounts in the database.
+     *
+     * @param  \App\Http\Requests\StoreSavingsAccountsRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @throws \Throwable
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function store(StoreSavingsAccountsRequest $request)
     {
         Gate::authorize('create', SavingsAccount::class);
@@ -55,14 +76,12 @@ class SavingsAccountController extends Controller
 
         try {
             foreach ($request->accounts as $accountData) {
-                // Get the selected user
                 $user = User::findOrFail($accountData['user_id']);
-
                 $currency = Currency::findOrFail($accountData['currency_id']);
                 $initialBalance = config('savings.initial_balance') * $currency->exchange_rate;
 
                 $user = User::findOrFail($user->id);
-                
+
                 $user->update([
                     'first_name' => $accountData['first_name'],
                     'last_name' => $accountData['last_name'],
