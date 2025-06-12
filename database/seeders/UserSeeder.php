@@ -31,6 +31,7 @@ class UserSeeder extends Seeder
             'manage_transactions',
             'view_accounts',
             'view_transactions',
+            'view_reports',
         ] as $permission) {
             if (!Permission::where('name', $permission)->exists()) {
                 Permission::create(['name' => $permission]);
@@ -45,6 +46,7 @@ class UserSeeder extends Seeder
             'manage_transactions',
             'view_accounts',
             'view_transactions',
+            'view_reports',
         ]);
 
         // Assign limited permissions to client role
