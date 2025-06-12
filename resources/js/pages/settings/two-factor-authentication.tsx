@@ -6,6 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { type BreadcrumbItem } from '@/types';
+import axios from 'axios';
+
+interface TwoFactorResponse {
+    qrCode: string;
+    recoveryCodes: string[];
+}
+
+type TwoFactorFormData = {
+    code: string;
+    password: string;
+    [key: string]: string;
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,26 +34,74 @@ export default function TwoFactorAuthentication() {
     const [qrCode, setQrCode] = useState<string | null>(null);
     const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
     const [showRecoveryCodes, setShowRecoveryCodes] = useState(false);
+    const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isEnabled, setIsEnabled] = useState(false);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<TwoFactorFormData>({
         code: '',
+        password: '',
     });
 
     const enableTwoFactor = () => {
-        post(route('two-factor.enable'), {
-            onSuccess: (response) => {
-                setQrCode(response.qrCode);
-                setRecoveryCodes(response.recoveryCodes);
-                setShowRecoveryCodes(true);
-            },
+        console.log('Enabling 2FA...');
+        setShowPasswordConfirmation(true);
+    };
+
+    const confirmPassword = () => {
+        console.log('Confirming password...');
+        axios.post(route('password.confirm'), {
+            password: data.password,
+        })
+        .then(() => {
+            console.log('Password confirmed, enabling 2FA...');
+            setShowPasswordConfirmation(false);
+            return axios.post(route('two-factor.enable'));
+        })
+        .then(() => {
+            console.log('2FA enabled, fetching QR code...');
+            return axios.get(route('two-factor.qr-code'));
+        })
+        .then((qrResponse) => {
+            console.log('QR Code response:', qrResponse.data);
+            setQrCode(qrResponse.data.svg);
+            setIsEnabled(true);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setError(error.response?.data?.message || 'An error occurred. Please try again.');
         });
     };
 
     const confirmTwoFactor = () => {
-        post(route('two-factor.confirm'), {
-            onSuccess: () => {
-                setShowRecoveryCodes(false);
-            },
+        console.log('Confirming 2FA...');
+        console.log('Sending code:', data.code);
+        console.log('Route:', route('two-factor.enable'));
+
+        axios.post(route('two-factor.enable'), {
+            code: data.code,
+        }, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => {
+            console.log('Response:', response);
+            console.log('2FA confirmed successfully');
+            return axios.get(route('two-factor.recovery-codes'));
+        })
+        .then((response) => {
+            console.log('Recovery codes response:', response.data);
+            setRecoveryCodes(response.data);
+            setShowRecoveryCodes(true);
+        })
+        .catch((error) => {
+            console.error('Error details:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            console.error('Error headers:', error.response?.headers);
+            setError(error.response?.data?.message || 'Invalid code. Please try again.');
         });
     };
 
@@ -58,7 +118,36 @@ export default function TwoFactorAuthentication() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {!qrCode ? (
+                        {error && (
+                            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                                <p className="text-sm text-red-600">{error}</p>
+                            </div>
+                        )}
+                        {showPasswordConfirmation ? (
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                    Please confirm your password to continue.
+                                </p>
+                                <div className="mt-4">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        name="password"
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
+                                        className="mt-1 block w-full"
+                                        required
+                                    />
+                                    {errors.password && (
+                                        <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+                                    )}
+                                </div>
+                                <Button onClick={confirmPassword} disabled={processing}>
+                                    Confirm Password
+                                </Button>
+                            </div>
+                        ) : !isEnabled ? (
                             <div className="space-y-4">
                                 <p className="text-sm text-gray-600">
                                     When two factor authentication is enabled, you will be prompted for a secure, random token during authentication. You may retrieve this token from your phone's Google Authenticator application.
@@ -74,13 +163,13 @@ export default function TwoFactorAuthentication() {
                                         <p className="text-sm text-gray-600">
                                             Store these recovery codes in a secure password manager. They can be used to recover access to your account if your two factor authentication device is lost.
                                         </p>
-                                        <div className="grid gap-1 max-w-xl mt-4 px-4 py-4 font-mono text-sm bg-gray-100 rounded-lg overflow-auto">
+                                        <div className="grid gap-1 max-w-xl mt-4 px-4 py-4 font-mono text-sm bg-gray-600 rounded-lg overflow-auto">
                                             {recoveryCodes.map((code) => (
                                                 <div key={code}>{code}</div>
                                             ))}
                                         </div>
-                                        <Button onClick={confirmTwoFactor} disabled={processing}>
-                                            Confirm
+                                        <Button onClick={() => window.location.reload()} disabled={processing}>
+                                            Done
                                         </Button>
                                     </div>
                                 ) : (
@@ -89,7 +178,7 @@ export default function TwoFactorAuthentication() {
                                             Two factor authentication is now enabled. Scan the following QR code using your phone's authenticator application.
                                         </p>
                                         <div className="mt-4">
-                                            <div dangerouslySetInnerHTML={{ __html: qrCode }} />
+                                            {qrCode && <div dangerouslySetInnerHTML={{ __html: qrCode }} />}
                                         </div>
                                         <div className="mt-4">
                                             <Label htmlFor="code">Code</Label>
