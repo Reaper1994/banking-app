@@ -27,7 +27,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/savings-accounts', [SavingsAccountController::class, 'index'])->name('savings-accounts.index');
         Route::get('/savings-accounts/create', [SavingsAccountController::class, 'create'])->name('savings-accounts.create');
         Route::post('/savings-accounts', [SavingsAccountController::class, 'store'])->name('savings-accounts.store');
-        Route::get('/savings-accounts/{savings_account}', [SavingsAccountController::class, 'show'])->name('savings-accounts.show');
     });
 });
 

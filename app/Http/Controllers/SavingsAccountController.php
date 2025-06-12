@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class SavingsAccountController extends Controller
 {
@@ -92,15 +93,5 @@ class SavingsAccountController extends Controller
             DB::rollBack();
             throw $e;
         }
-    }
-
-    public function show(SavingsAccount $savings_account)
-    {
-        Gate::authorize('view', $savings_account);
-        $savings_account->load('user');
-
-        return Inertia::render('SavingsAccounts/Show', [
-            'account' => $savings_account,
-        ]);
     }
 }
