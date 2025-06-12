@@ -31,4 +31,4 @@ class PermissionSeeder extends Seeder
         $userRole = Role::create(['name' => 'user']);
         $userRole->givePermissionTo(['view_dashboard']);
     }
-} 
+}

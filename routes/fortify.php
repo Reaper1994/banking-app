@@ -1,8 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
-use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => config('fortify.middleware', ['web'])], function () {
 

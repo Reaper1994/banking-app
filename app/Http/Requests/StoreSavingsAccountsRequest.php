@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 use App\Models\SavingsAccount;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreSavingsAccountsRequest extends FormRequest
 {
@@ -19,48 +22,45 @@ class StoreSavingsAccountsRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
-     public function rules(): array
+    public function rules(): array
     {
         return [
-            'accounts' => 'required|array|min:1',
-            'accounts.*.user_id' => 'required|exists:users,id',
-            'accounts.*.first_name' => 'required|string|max:255',
-            'accounts.*.last_name' => 'required|string|max:255',
-            'accounts.*.date_of_birth' => 'required|date',
-            'accounts.*.address' => 'required|string|max:255',
-            'accounts.*.currency_id' => 'required|exists:currencies,id',
+            'accounts' => ['required', 'array', 'min:1'],
+            'accounts.*.user_id' => ['required', 'exists:users,id'],
+            'accounts.*.first_name' => ['required', 'string', 'max:255'],
+            'accounts.*.last_name' => ['required', 'string', 'max:255'],
+            'accounts.*.date_of_birth' => ['required', 'date', 'before:today'],
+            'accounts.*.address' => ['required', 'string', 'max:255'],
+            'accounts.*.currency_id' => [
+                'required',
+                'exists:currencies,id',
+                Rule::exists('currencies', 'id')->where('is_active', true),
+            ],
         ];
     }
 
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
-            'accounts.required' => 'You must provide at least one account.',
-            'accounts.array' => 'Accounts must be an array.',
-            'accounts.min' => 'At least one account is required.',
-            
-            'accounts.*.user_id.required' => 'Each account must have a user ID.',
-            'accounts.*.user_id.exists' => 'One or more user IDs are invalid.',
-            
-            'accounts.*.first_name.required' => 'First name is required for each account.',
-            'accounts.*.first_name.string' => 'First name must be a string.',
-            'accounts.*.first_name.max' => 'First name may not exceed 255 characters.',
-
-            'accounts.*.last_name.required' => 'Last name is required for each account.',
-            'accounts.*.last_name.string' => 'Last name must be a string.',
-            'accounts.*.last_name.max' => 'Last name may not exceed 255 characters.',
-
+            'accounts.required' => 'At least one account must be created.',
+            'accounts.min' => 'At least one account must be created.',
+            'accounts.*.user_id.required' => 'User selection is required.',
+            'accounts.*.user_id.exists' => 'Selected user does not exist.',
+            'accounts.*.first_name.required' => 'First name is required.',
+            'accounts.*.last_name.required' => 'Last name is required.',
             'accounts.*.date_of_birth.required' => 'Date of birth is required.',
-            'accounts.*.date_of_birth.date' => 'Date of birth must be a valid date.',
-
-            'accounts.*.address.required' => 'Address is required for each account.',
-            'accounts.*.address.string' => 'Address must be a string.',
-            'accounts.*.address.max' => 'Address may not exceed 255 characters.',
-
-            'accounts.*.currency_id.required' => 'Currency is required.',
-            'accounts.*.currency_id.exists' => 'One or more currency IDs are invalid.',
+            'accounts.*.date_of_birth.date' => 'Invalid date format.',
+            'accounts.*.date_of_birth.before' => 'Date of birth must be before today.',
+            'accounts.*.address.required' => 'Address is required.',
+            'accounts.*.currency_id.required' => 'Currency selection is required.',
+            'accounts.*.currency_id.exists' => 'Selected currency does not exist or is not active.',
         ];
     }
 

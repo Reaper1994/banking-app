@@ -11,4 +11,4 @@ return [
     */
 
     'initial_balance' => env('SAVINGS_INITIAL_BALANCE', 10000),
-]; 
+];

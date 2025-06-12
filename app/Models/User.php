@@ -15,7 +15,10 @@ class User extends Authenticatable
 {
     // use HasApiTokens;
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    use HasFactory;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
+    use HasRoles;
 
     /**
      * The attributes that are mass assignable.

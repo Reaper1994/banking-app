@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -16,10 +15,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Create roles if they don't exist
-        if (!Role::where('name', 'admin')->exists()) {
+        if (! Role::where('name', 'admin')->exists()) {
             Role::create(['name' => 'admin']);
         }
-        if (!Role::where('name', 'client')->exists()) {
+        if (! Role::where('name', 'client')->exists()) {
             Role::create(['name' => 'client']);
         }
 
@@ -33,7 +32,7 @@ class UserSeeder extends Seeder
             'view_transactions',
             'view_reports',
         ] as $permission) {
-            if (!Permission::where('name', $permission)->exists()) {
+            if (! Permission::where('name', $permission)->exists()) {
                 Permission::create(['name' => $permission]);
             }
         }
@@ -54,7 +53,7 @@ class UserSeeder extends Seeder
         $clientRole->givePermissionTo([
             'view_dashboard',
             'view_transactions',
-            'view_reports'
+            'view_reports',
         ]);
 
         // Create or update admin user
@@ -69,7 +68,7 @@ class UserSeeder extends Seeder
                 'address' => '123 Admin Street',
             ]
         );
-        if (!$admin->hasRole('admin')) {
+        if (! $admin->hasRole('admin')) {
             $admin->assignRole('admin');
         }
 
@@ -109,7 +108,7 @@ class UserSeeder extends Seeder
                 ['email' => $clientData['email']],
                 $clientData
             );
-            if (!$client->hasRole('client')) {
+            if (! $client->hasRole('client')) {
                 $client->assignRole('client');
             }
         }

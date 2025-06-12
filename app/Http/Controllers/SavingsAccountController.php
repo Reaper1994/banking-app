@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSavingsAccountsRequest;
+use App\Models\Currency;
 use App\Models\SavingsAccount;
 use App\Models\User;
-use App\Models\Currency;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
+use Inertia\Response;
 
 class SavingsAccountController extends Controller
 {
@@ -20,30 +22,80 @@ class SavingsAccountController extends Controller
         Gate::authorize('viewAny', SavingsAccount::class);
     }
 
-   /**
+    /**
      * Display a paginated list of savings accounts.
      *
-     * @return \Inertia\Response
+     * @param Request $request
+     * @return Response
      */
-    public function index()
+    public function index(Request $request): Response
     {
-        $accounts = SavingsAccount::with(['user:id,email,first_name,last_name,address', 'currency'])
-            ->latest()
-            ->paginate(10);
+        $query = SavingsAccount::with(['user:id,email,first_name,last_name,address', 'currency']);
+
+        // Search by account number
+        if ($request->filled('account_number')) {
+            $query->where('account_number', 'like', '%' . $request->string('account_number') . '%');
+        }
+
+        // Search by name (first name or last name)
+        if ($request->filled('name')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('first_name', 'like', '%' . $request->string('name') . '%')
+                  ->orWhere('last_name', 'like', '%' . $request->string('name') . '%');
+            });
+        }
+
+        // Search by email
+        if ($request->filled('email')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('email', 'like', '%' . $request->string('email') . '%');
+            });
+        }
+
+        // Search by balance range
+        if ($request->filled('min_balance')) {
+            $query->where('balance', '>=', $request->float('min_balance'));
+        }
+        if ($request->filled('max_balance')) {
+            $query->where('balance', '<=', $request->float('max_balance'));
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->string('status') === 'active');
+        }
+
+        // Filter by currency
+        if ($request->filled('currency_id')) {
+            $query->where('currency_id', $request->integer('currency_id'));
+        }
+
+        $accounts = $query->latest()->paginate(10)->withQueryString();
+
+        $currencies = Currency::where('is_active', true)->get(['id', 'code', 'name', 'symbol']);
 
         return Inertia::render('SavingsAccounts/Index', [
             'accounts' => $accounts,
+            'currencies' => $currencies,
+            'filters' => $request->only([
+                'account_number',
+                'name',
+                'email',
+                'min_balance',
+                'max_balance',
+                'status',
+                'currency_id',
+            ]),
         ]);
     }
 
     /**
      * Show the form for creating new savings accounts.
      *
-     * @return \Inertia\Response
-     *
+     * @return Response
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create()
+    public function create(): Response
     {
         Gate::authorize('create', SavingsAccount::class);
 
@@ -62,13 +114,12 @@ class SavingsAccountController extends Controller
     /**
      * Store newly created savings accounts in the database.
      *
-     * @param  \App\Http\Requests\StoreSavingsAccountsRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
+     * @param StoreSavingsAccountsRequest $request
+     * @return RedirectResponse
      * @throws \Throwable
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(StoreSavingsAccountsRequest $request)
+    public function store(StoreSavingsAccountsRequest $request): RedirectResponse
     {
         Gate::authorize('create', SavingsAccount::class);
 
@@ -103,6 +154,7 @@ class SavingsAccountController extends Controller
                 ->with('success', 'Savings accounts created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             throw $e;
         }
     }

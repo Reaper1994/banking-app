@@ -4,7 +4,6 @@ use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticationController;
 
 Route::middleware('auth')->group(function () {
