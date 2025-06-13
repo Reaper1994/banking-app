@@ -12,7 +12,6 @@ class PermissionSeeder extends Seeder
     {
         // Create permissions
         $permissions = [
-            'view_reports',
             'manage_users',
             'manage_roles',
             'manage_permissions',

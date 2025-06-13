@@ -14,7 +14,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles if they don't exist
         if (! Role::where('name', 'admin')->exists()) {
             Role::create(['name' => 'admin']);
         }
@@ -22,7 +21,6 @@ class UserSeeder extends Seeder
             Role::create(['name' => 'client']);
         }
 
-        // Create permissions if they don't exist
         foreach ([
             'view_dashboard',
             'manage_users',
@@ -30,7 +28,6 @@ class UserSeeder extends Seeder
             'manage_transactions',
             'view_accounts',
             'view_transactions',
-            'view_reports',
         ] as $permission) {
             if (! Permission::where('name', $permission)->exists()) {
                 Permission::create(['name' => $permission]);
@@ -45,18 +42,14 @@ class UserSeeder extends Seeder
             'manage_transactions',
             'view_accounts',
             'view_transactions',
-            'view_reports',
         ]);
 
-        // Assign limited permissions to client role
         $clientRole = Role::where('name', 'client')->first();
         $clientRole->givePermissionTo([
             'view_dashboard',
             'view_transactions',
-            'view_reports',
         ]);
 
-        // Create or update admin user
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -72,7 +65,7 @@ class UserSeeder extends Seeder
             $admin->assignRole('admin');
         }
 
-        // Create or update client users
+
         $clients = [
             [
                 'name' => 'John Doe',
