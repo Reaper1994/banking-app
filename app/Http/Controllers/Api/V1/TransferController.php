@@ -47,4 +47,4 @@ final class TransferController extends Controller
             ], 500);
         }
     }
-} 
+}

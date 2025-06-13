@@ -11,4 +11,4 @@ Route::prefix('v1')
     ->group(function () {
         Route::post('/transfers', [TransferController::class, 'transfer'])
             ->middleware('throttle:10,1'); // 10 transfers per minute
-    }); 
+    });

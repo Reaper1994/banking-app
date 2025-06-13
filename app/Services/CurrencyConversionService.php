@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 
 final class CurrencyConversionService
@@ -27,14 +27,14 @@ final class CurrencyConversionService
         }
 
         $rates = $this->getExchangeRates($fromCurrency);
-        
-        if (!isset($rates[$toCurrency])) {
+
+        if (! isset($rates[$toCurrency])) {
             throw new InvalidArgumentException("Unsupported currency: {$toCurrency}");
         }
 
         $rate = $rates[$toCurrency];
         $convertedAmount = $amount * $rate;
-        
+
         return $convertedAmount * (1 - self::SPREAD);
     }
 
@@ -51,15 +51,15 @@ final class CurrencyConversionService
                     'symbols' => 'USD,EUR,GBP',
                     'format' => 1,
                 ]);
-             
 
-                if (!$response->successful()) {
+
+                if (! $response->successful()) {
                     throw new InvalidArgumentException('Failed to fetch exchange rates');
                 }
 
                 $data = $response->json();
-             
-                if (!isset($data['rates'][$baseCurrency])) {
+
+                if (! isset($data['rates'][$baseCurrency])) {
                     throw new InvalidArgumentException("Exchange rate for {$baseCurrency} not found");
                 }
 
@@ -67,4 +67,4 @@ final class CurrencyConversionService
             }
         );
     }
-} 
+}

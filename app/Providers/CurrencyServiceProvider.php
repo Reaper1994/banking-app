@@ -14,7 +14,7 @@ final class CurrencyServiceProvider extends ServiceProvider
     {
         $this->app->singleton(CurrencyConversionService::class, function ($app) {
             $apiKey = config('services.exchange_rates.api_key');
-            
+
             if (empty($apiKey)) {
                 throw new InvalidArgumentException(
                     'Exchange Rates API key is not set. Please add EXCHANGE_RATES_API_KEY to your .env file.'
@@ -24,4 +24,4 @@ final class CurrencyServiceProvider extends ServiceProvider
             return new CurrencyConversionService($apiKey);
         });
     }
-} 
+}

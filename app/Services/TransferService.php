@@ -67,4 +67,4 @@ final class TransferService
     {
         return 'TRF-' . strtoupper(uniqid());
     }
-} 
+}

@@ -33,4 +33,4 @@ final class TransferObserver
             'description' => $transfer->description,
         ]);
     }
-} 
+}

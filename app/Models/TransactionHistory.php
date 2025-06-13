@@ -38,4 +38,4 @@ final class TransactionHistory extends Model
     {
         return $this->belongsTo(Transfer::class);
     }
-} 
+}

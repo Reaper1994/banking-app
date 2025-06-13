@@ -37,4 +37,4 @@ final class TransferResource extends JsonResource
             ],
         ];
     }
-} 
+}

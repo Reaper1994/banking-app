@@ -50,4 +50,4 @@ final class RouteServiceProvider extends ServiceProvider
                 });
         });
     }
-} 
+}

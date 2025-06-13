@@ -40,4 +40,4 @@ final class Transfer extends Model
     {
         return $this->belongsTo(SavingsAccount::class, 'recipient_account_id');
     }
-} 
+}

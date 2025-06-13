@@ -33,4 +33,4 @@ final class TransferRepository implements TransferRepositoryInterface
     {
         return $transfer->update(['status' => $status]);
     }
-} 
+}
