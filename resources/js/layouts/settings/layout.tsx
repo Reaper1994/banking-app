@@ -22,6 +22,13 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/appearance',
         icon: null,
     },
+    {
+        title: 'Sample 2FA Flow - WIP',
+        href: '/settings/two-factor-authentication',
+        icon: null,
+    },
+
+
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

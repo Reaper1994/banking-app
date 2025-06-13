@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SavingsAccountController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +21,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings/two-factor-authentication', function () {
         return Inertia::render('settings/two-factor-authentication');
     })->name('two-factor-authentication');
+
+    // Savings Accounts Routes
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::get('/savings-accounts', [SavingsAccountController::class, 'index'])->name('savings-accounts.index');
+        Route::get('/savings-accounts/create', [SavingsAccountController::class, 'create'])->name('savings-accounts.create');
+        Route::post('/savings-accounts', [SavingsAccountController::class, 'store'])->name('savings-accounts.store');
+    });
 });
 
 require __DIR__.'/settings.php';
