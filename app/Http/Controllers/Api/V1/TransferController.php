@@ -25,6 +25,7 @@ final class TransferController extends Controller
             $senderAccount = SavingsAccount::findOrFail($request->input('sender_account_id'));
             $recipientAccount = SavingsAccount::where('account_number', $request->input('recipient_account_number'))->firstOrFail();
 
+           //TODO: needs to be moved to a DTO
             $transfer = $this->transferService->initiateTransfer(
                 $senderAccount,
                 $recipientAccount,
