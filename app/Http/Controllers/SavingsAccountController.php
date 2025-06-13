@@ -32,12 +32,10 @@ class SavingsAccountController extends Controller
     {
         $query = SavingsAccount::with(['user:id,email,first_name,last_name,address', 'currency']);
 
-        // Search by account number
         if ($request->filled('account_number')) {
             $query->where('account_number', 'like', '%' . $request->string('account_number') . '%');
         }
 
-        // Search by name (first name or last name)
         if ($request->filled('name')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('first_name', 'like', '%' . $request->string('name') . '%')
@@ -45,14 +43,13 @@ class SavingsAccountController extends Controller
             });
         }
 
-        // Search by email
         if ($request->filled('email')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('email', 'like', '%' . $request->string('email') . '%');
             });
         }
 
-        // Search by balance range
+
         if ($request->filled('min_balance')) {
             $query->where('balance', '>=', $request->float('min_balance'));
         }
@@ -60,12 +57,10 @@ class SavingsAccountController extends Controller
             $query->where('balance', '<=', $request->float('max_balance'));
         }
 
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('is_active', $request->string('status') === 'active');
         }
 
-        // Filter by currency
         if ($request->filled('currency_id')) {
             $query->where('currency_id', $request->integer('currency_id'));
         }
