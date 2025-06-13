@@ -11,12 +11,10 @@ class Currency extends Model
         'code',
         'name',
         'symbol',
-        'exchange_rate',
         'is_active',
     ];
 
     protected $casts = [
-        'exchange_rate' => 'decimal:4',
         'is_active' => 'boolean',
     ];
 

@@ -31,7 +31,18 @@ class StoreSavingsAccountsRequest extends FormRequest
             'accounts.*.user_id' => ['required', 'exists:users,id'],
             'accounts.*.first_name' => ['required', 'string', 'max:255'],
             'accounts.*.last_name' => ['required', 'string', 'max:255'],
-            'accounts.*.date_of_birth' => ['required', 'date', 'before:today'],
+            'accounts.*.date_of_birth' => [
+                'required',
+                'date',
+                'before:today',
+                function ($attribute, $value, $fail) {
+                    $dob = \Carbon\Carbon::parse($value);
+                    $age = $dob->age;
+                    if ($age < 18) {
+                        $fail('User must be at least 18 years old.');
+                    }
+                },
+            ],
             'accounts.*.address' => ['required', 'string', 'max:255'],
             'accounts.*.currency_id' => [
                 'required',
@@ -58,6 +69,7 @@ class StoreSavingsAccountsRequest extends FormRequest
             'accounts.*.date_of_birth.required' => 'Date of birth is required.',
             'accounts.*.date_of_birth.date' => 'Invalid date format.',
             'accounts.*.date_of_birth.before' => 'Date of birth must be before today.',
+            'accounts.*.date_of_birth.18_years' => 'User must be at least 18 years old.',
             'accounts.*.address.required' => 'Address is required.',
             'accounts.*.currency_id.required' => 'Currency selection is required.',
             'accounts.*.currency_id.exists' => 'Selected currency does not exist or is not active.',

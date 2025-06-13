@@ -45,13 +45,12 @@ final class CurrencyConversionService
             self::CACHE_TTL,
             function () use ($baseCurrency) {
 
-                //NOTE:free subscriotin only supports base currency as usd ,i cant request for a different base currency.
+                //NOTE:free subscription only supports base currency as usd , so I cant request for a different base currency.
                 $response = Http::get(self::API_URL, [
                     'access_key' => $this->apiKey,
                     'symbols' => 'USD,EUR,GBP',
                     'format' => 1,
                 ]);
-
 
                 if (! $response->successful()) {
                     throw new InvalidArgumentException('Failed to fetch exchange rates');

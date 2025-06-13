@@ -96,7 +96,18 @@ class SavingsAccountController extends Controller
 
         $users = User::role('client')
             ->select(['id', 'name', 'email', 'first_name', 'last_name', 'date_of_birth', 'address'])
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'date_of_birth' => $user->date_of_birth ? $user->date_of_birth->format('Y-m-d') : null,
+                    'address' => $user->address,
+                ];
+            });
 
         $currencies = Currency::where('is_active', true)->get(['id', 'code', 'name', 'symbol']);
 
@@ -124,7 +135,7 @@ class SavingsAccountController extends Controller
             foreach ($request->accounts as $accountData) {
                 $user = User::findOrFail($accountData['user_id']);
                 $currency = Currency::findOrFail($accountData['currency_id']);
-                $initialBalance = config('savings.initial_balance') * $currency->exchange_rate;
+                $initialBalance = config('savings.initial_balance');
 
                 $user = User::findOrFail($user->id);
 

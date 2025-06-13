@@ -17,7 +17,6 @@ class CurrencySeeder extends Seeder
                 'code' => 'USD',
                 'name' => 'US Dollar',
                 'symbol' => '$',
-                'exchange_rate' => 1.0000,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -26,7 +25,6 @@ class CurrencySeeder extends Seeder
                 'code' => 'EUR',
                 'name' => 'Euro',
                 'symbol' => '€',
-                'exchange_rate' => 0.9200, // Example rate: 1 USD = 0.92 EUR
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -35,7 +33,6 @@ class CurrencySeeder extends Seeder
                 'code' => 'GBP',
                 'name' => 'British Pound',
                 'symbol' => '£',
-                'exchange_rate' => 0.7800, // Example rate: 1 USD = 0.78 GBP
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),

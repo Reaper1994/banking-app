@@ -12,10 +12,9 @@ return new class () extends Migration {
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->id();
-            $table->string('code', 3)->unique(); // ISO 4217 code (e.g., USD, EUR, GBP)
-            $table->string('name'); // Full name (e.g., US Dollar, Euro, British Pound)
-            $table->string('symbol', 5); // Currency symbol (e.g., $, €, £)
-            $table->decimal('exchange_rate', 10, 4)->default(1.0000); // Exchange rate relative to USD
+            $table->string('code', 3)->unique();
+            $table->string('name');
+            $table->string('symbol', 5);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
